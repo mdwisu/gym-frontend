@@ -55,6 +55,33 @@ export const memberService = {
     }
   },
 
+  async createPackage(packageData) {
+    try {
+      const response = await api.post('/packages', packageData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to create package');
+    }
+  },
+
+  async updatePackage(id, packageData) {
+    try {
+      const response = await api.put(`/packages/${id}`, packageData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to update package');
+    }
+  },
+
+  async deletePackage(id) {
+    try {
+      const response = await api.delete(`/packages/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to delete package');
+    }
+  },
+
   async searchMembers(searchTerm, searchType = 'name') {
     try {
       const searchData = {};

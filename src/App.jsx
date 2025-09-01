@@ -7,6 +7,8 @@ import Dashboard from './components/Dashboard';
 import Members from './components/Members';
 import CheckIn from './components/CheckIn';
 import MemberCard from './components/MemberCard';
+import FinancialReports from './components/FinancialReports';
+import Packages from './components/Packages';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
@@ -29,8 +31,10 @@ function App() {
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="members" element={<Members />} />
+                <Route path="packages" element={<Packages />} />
                 <Route path="checkin" element={<CheckIn />} />
                 <Route path="member-card" element={<MemberCard />} />
+                <Route path="reports" element={<FinancialReports />} />
               </Route>
             </Routes>
           </div>

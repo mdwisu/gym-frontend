@@ -49,6 +49,17 @@ const Layout = () => {
               </NavLink>
 
               <NavLink
+                to="/packages"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                  isActive('/packages')
+                    ? 'text-primary-600 bg-primary-50 border border-primary-200'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <span className="mr-2">📦</span> Packages
+              </NavLink>
+
+              <NavLink
                 to="/checkin"
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                   isActive('/checkin')
@@ -68,6 +79,17 @@ const Layout = () => {
                 }`}
               >
                 <span className="mr-2">🆔</span> ID Card
+              </NavLink>
+
+              <NavLink
+                to="/reports"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                  isActive('/reports')
+                    ? 'text-primary-600 bg-primary-50 border border-primary-200'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <span className="mr-2">💰</span> Reports
               </NavLink>
               
               <button

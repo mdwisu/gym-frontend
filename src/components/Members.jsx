@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { memberService } from '../services/memberService';
 import { useNotification } from '../contexts/NotificationContext';
 import MemberModal from './MemberModal';
+import RenewMembershipModal from './RenewMembershipModal';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
@@ -11,6 +12,8 @@ const Members = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+  const [showRenewModal, setShowRenewModal] = useState(false);
+  const [renewMember, setRenewMember] = useState(null);
   
   const { showSuccess, showError } = useNotification();
 
@@ -86,6 +89,21 @@ const Members = () => {
     loadMembers();
     handleModalClose();
     showSuccess(editingMember ? 'Member updated successfully!' : 'Member added successfully!');
+  };
+
+  const handleRenewMembership = (member) => {
+    setRenewMember(member);
+    setShowRenewModal(true);
+  };
+
+  const handleRenewModalClose = () => {
+    setShowRenewModal(false);
+    setRenewMember(null);
+  };
+
+  const handleRenewalSuccess = (result) => {
+    showSuccess(`Membership renewed successfully! Extended until ${new Date(result.renewalDetails.newEndDate).toLocaleDateString('id-ID')}`);
+    loadMembers(); // Refresh member data
   };
 
   const formatDate = (dateString) => {
@@ -210,6 +228,13 @@ const Members = () => {
                 <div className="flex items-center">
                   <div className="flex space-x-2">
                     <button
+                      onClick={() => handleRenewMembership(member)}
+                      className="px-3 py-1 text-xs bg-green-500 text-white hover:bg-green-600 rounded transition-colors duration-200"
+                      title="Renew Membership"
+                    >
+                      Renew
+                    </button>
+                    <button
                       onClick={() => handleEditMember(member)}
                       className="px-3 py-1 text-xs bg-yellow-500 text-white hover:bg-yellow-600 rounded transition-colors duration-200"
                     >
@@ -235,6 +260,16 @@ const Members = () => {
           member={editingMember}
           onClose={handleModalClose}
           onSave={handleMemberSaved}
+        />
+      )}
+
+      {/* Renewal Modal */}
+      {showRenewModal && (
+        <RenewMembershipModal
+          isOpen={showRenewModal}
+          member={renewMember}
+          onClose={handleRenewModalClose}
+          onRenewalSuccess={handleRenewalSuccess}
         />
       )}
     </div>
