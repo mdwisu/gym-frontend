@@ -6,10 +6,12 @@ import RenewMembershipModal from './RenewMembershipModal';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
-  const [filteredMembers, setFilteredMembers] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showModal, setShowModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [showRenewModal, setShowRenewModal] = useState(false);
@@ -19,17 +21,14 @@ const Members = () => {
 
   useEffect(() => {
     loadMembers();
-  }, []);
-
-  useEffect(() => {
-    filterMembers();
-  }, [members, searchTerm, statusFilter]);
+  }, [currentPage, itemsPerPage, searchTerm, statusFilter]);
 
   const loadMembers = async () => {
     try {
       setLoading(true);
-      const data = await memberService.getAllMembers();
-      setMembers(data);
+      const data = await memberService.getAllMembers(currentPage, itemsPerPage, searchTerm, statusFilter);
+      setMembers(data.members || []);
+      setPagination(data.pagination || null);
     } catch (error) {
       showError(error.message);
     } finally {
@@ -37,23 +36,23 @@ const Members = () => {
     }
   };
 
-  const filterMembers = () => {
-    let filtered = members;
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
-    if (searchTerm) {
-      filtered = filtered.filter(member =>
-        member.id.toString().includes(searchTerm) ||
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (member.phone && member.phone.includes(searchTerm)) ||
-        (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
+  const handleItemsPerPageChange = (newLimit) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+  };
 
-    if (statusFilter) {
-      filtered = filtered.filter(member => member.status === statusFilter);
-    }
+  const handleSearchChange = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  };
 
-    setFilteredMembers(filtered);
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
   };
 
   const handleAddMember = () => {
@@ -149,14 +148,14 @@ const Members = () => {
                 type="text"
                 placeholder="Search by ID, name, phone, or email..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="form-input w-full"
               />
             </div>
             <div className="w-full sm:w-48">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
                 className="form-input w-full"
               >
                 <option value="">All Status</option>
@@ -175,29 +174,30 @@ const Members = () => {
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
-        ) : filteredMembers.length === 0 ? (
+        ) : members.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            {members.length === 0 ? 'No members found' : 'No members match your search criteria'}
+            No members found
           </div>
         ) : (
-          <div className="overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-7 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-medium text-gray-700">
-              <div className="text-left">ID</div>
-              <div className="text-left">Name</div>
-              <div className="text-left">Membership</div>
-              <div className="text-left">Start Date</div>
-              <div className="text-left">End Date</div>
-              <div className="text-left">Status</div>
-              <div className="text-left">Actions</div>
-            </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[800px]">
+              {/* Table Header */}
+              <div className="grid grid-cols-7 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-medium text-gray-700">
+                <div className="text-left min-w-[60px]">ID</div>
+                <div className="text-left min-w-[140px]">Name</div>
+                <div className="text-left min-w-[120px]">Membership</div>
+                <div className="text-left min-w-[100px]">Start Date</div>
+                <div className="text-left min-w-[100px]">End Date</div>
+                <div className="text-left min-w-[120px]">Status</div>
+                <div className="text-left min-w-[200px]">Actions</div>
+              </div>
 
-            {/* Table Body */}
-            {filteredMembers.map((member) => (
-              <div
-                key={member.id}
-                className="grid grid-cols-7 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
-              >
+              {/* Table Body */}
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="grid grid-cols-7 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                >
                 <div className="flex items-center">
                   <div className="bg-primary-100 text-primary-800 px-2 py-1 rounded text-sm font-medium">
                     #{member.id}
@@ -249,10 +249,138 @@ const Members = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="card mt-6">
+          <div className="p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+              {/* Items per page selector */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Show:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                  className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-sm text-gray-600">per page</span>
+              </div>
+
+              {/* Pagination info */}
+              <div className="text-sm text-gray-600">
+                Showing {((pagination.currentPage - 1) * pagination.limit) + 1} to{' '}
+                {Math.min(pagination.currentPage * pagination.limit, pagination.totalMembers)} of{' '}
+                {pagination.totalMembers} members
+              </div>
+
+              {/* Pagination buttons */}
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPreviousPage}
+                  className={`px-3 py-2 text-sm rounded-md ${
+                    pagination.hasPreviousPage
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Previous
+                </button>
+
+                {/* Page numbers */}
+                {(() => {
+                  const pages = [];
+                  const { currentPage, totalPages } = pagination;
+                  let startPage = Math.max(1, currentPage - 2);
+                  let endPage = Math.min(totalPages, currentPage + 2);
+
+                  // Adjust range to always show 5 pages if possible
+                  if (endPage - startPage < 4) {
+                    if (startPage === 1) {
+                      endPage = Math.min(totalPages, startPage + 4);
+                    } else {
+                      startPage = Math.max(1, endPage - 4);
+                    }
+                  }
+
+                  // First page
+                  if (startPage > 1) {
+                    pages.push(
+                      <button
+                        key={1}
+                        onClick={() => handlePageChange(1)}
+                        className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
+                      >
+                        1
+                      </button>
+                    );
+                    if (startPage > 2) {
+                      pages.push(<span key="dots1" className="px-2 text-gray-400">...</span>);
+                    }
+                  }
+
+                  // Page numbers
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => handlePageChange(i)}
+                        className={`px-3 py-2 text-sm rounded-md ${
+                          i === currentPage
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+
+                  // Last page
+                  if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                      pages.push(<span key="dots2" className="px-2 text-gray-400">...</span>);
+                    }
+                    pages.push(
+                      <button
+                        key={totalPages}
+                        onClick={() => handlePageChange(totalPages)}
+                        className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
+                      >
+                        {totalPages}
+                      </button>
+                    );
+                  }
+
+                  return pages;
+                })()}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                  className={`px-3 py-2 text-sm rounded-md ${
+                    pagination.hasNextPage
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Member Modal */}
       {showModal && (

@@ -1,9 +1,15 @@
 import api from './api';
 
 export const memberService = {
-  async getAllMembers() {
+  async getAllMembers(page = 1, limit = 10, search = '', status = '') {
     try {
-      const response = await api.get('/members');
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      if (search) params.append('search', search);
+      if (status) params.append('status', status);
+      
+      const response = await api.get(`/members?${params.toString()}`);
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to fetch members');

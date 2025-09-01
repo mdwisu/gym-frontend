@@ -22,14 +22,15 @@ const Dashboard = () => {
       setLoading(true);
       
       // Load stats and members
-      const [statsData, membersData] = await Promise.all([
+      const [statsData, membersResponse] = await Promise.all([
         memberService.getDashboardStats(),
-        memberService.getAllMembers()
+        memberService.getAllMembers(1, 100) // Get first 100 members for dashboard
       ]);
 
       setStats(statsData);
       
       // Filter expiring soon members
+      const membersData = membersResponse.members || [];
       const expiring = membersData.filter(member => member.status === 'expiring_soon');
       setExpiringSoonMembers(expiring);
       
