@@ -83,6 +83,32 @@
   flex: 1;
 }
 
+.qr-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 0.5rem 0;
+}
+
+.qr-container {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.qr-label {
+  font-size: 0.625rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  line-height: 1.2;
+}
+
 .detail-label {
   font-size: 0.625rem;
   color: #6b7280;
@@ -263,6 +289,32 @@
     flex: 1 !important;
   }
   
+  .id-card .qr-section {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1mm !important;
+    padding: 1mm !important;
+    border-top: 0.4mm solid #999 !important;
+    border-bottom: 0.4mm solid #999 !important;
+    margin: 1mm 0 !important;
+  }
+  
+  .id-card .qr-container {
+    width: 15mm !important;
+    height: 15mm !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .id-card .qr-label {
+    font-size: 5px !important;
+    color: #666 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+    line-height: 1.1 !important;
+  }
+
   .id-card .footer-section {
     border-top: 0.4mm solid #999 !important;
     padding-top: 0.8mm !important;

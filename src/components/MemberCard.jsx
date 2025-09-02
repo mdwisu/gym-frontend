@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import QRCode from 'react-qr-code';
 import { useNotification } from '../contexts/NotificationContext';
 import './MemberCard.css';
 
@@ -424,6 +425,26 @@ const MemberCard = () => {
                 </div>
               </div>
 
+              {/* QR Code Section */}
+              <div className="qr-section">
+                <div className="qr-container">
+                  <QRCode
+                    size={60}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    value={JSON.stringify({
+                      id: member.id,
+                      name: member.name,
+                      membershipType: member.membershipType,
+                      endDate: member.endDate,
+                      phone: member.phone || '',
+                      timestamp: Date.now()
+                    })}
+                    viewBox={`0 0 60 60`}
+                  />
+                </div>
+                <div className="qr-label">Scan for Check-in</div>
+              </div>
+
               {/* Footer */}
               <div className="footer-section">
                 <p className="footer-text">Present this card for gym access</p>
@@ -437,8 +458,9 @@ const MemberCard = () => {
             <div className="p-4">
               <h3 className="font-semibold text-gray-900 mb-2">How to use your Member ID:</h3>
               <div className="text-sm text-gray-600 space-y-1">
-                <p>• <strong>For Check-in:</strong> Tell the staff your Member ID: <span className="bg-primary-100 text-primary-800 px-2 py-1 rounded font-mono">#{member.id}</span></p>
-                <p>• <strong>Alternative:</strong> Use your phone number: <span className="bg-gray-100 px-2 py-1 rounded font-mono">{member.phone}</span></p>
+                <p>• <strong>QR Code Scan:</strong> Scan the QR code on your card for instant check-in</p>
+                <p>• <strong>Member ID:</strong> Tell the staff your Member ID: <span className="bg-primary-100 text-primary-800 px-2 py-1 rounded font-mono">#{member.id}</span></p>
+                <p>• <strong>Phone Number:</strong> Use your phone number: <span className="bg-gray-100 px-2 py-1 rounded font-mono">{member.phone}</span></p>
                 <p>• <strong>Print this card</strong> and bring it to the gym for faster access</p>
               </div>
             </div>

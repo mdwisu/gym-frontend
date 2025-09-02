@@ -3,6 +3,7 @@ import { memberService } from '../services/memberService';
 import { useNotification } from '../contexts/NotificationContext';
 import MemberModal from './MemberModal';
 import RenewMembershipModal from './RenewMembershipModal';
+import MemberQRCode from './MemberQRCode';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
@@ -16,6 +17,8 @@ const Members = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [showRenewModal, setShowRenewModal] = useState(false);
   const [renewMember, setRenewMember] = useState(null);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrMember, setQrMember] = useState(null);
   
   const { showSuccess, showError } = useNotification();
 
@@ -105,6 +108,16 @@ const Members = () => {
     loadMembers(); // Refresh member data
   };
 
+  const handleShowQR = (member) => {
+    setQrMember(member);
+    setShowQRModal(true);
+  };
+
+  const handleQRModalClose = () => {
+    setShowQRModal(false);
+    setQrMember(null);
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('id-ID');
   };
@@ -189,7 +202,7 @@ const Members = () => {
                 <div className="text-left min-w-[100px]">Start Date</div>
                 <div className="text-left min-w-[100px]">End Date</div>
                 <div className="text-left min-w-[120px]">Status</div>
-                <div className="text-left min-w-[200px]">Actions</div>
+                <div className="text-left min-w-[240px]">Actions</div>
               </div>
 
               {/* Table Body */}
@@ -227,6 +240,13 @@ const Members = () => {
                 </div>
                 <div className="flex items-center">
                   <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleShowQR(member)}
+                      className="px-3 py-1 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded transition-colors duration-200"
+                      title="Show QR Code"
+                    >
+                      QR
+                    </button>
                     <button
                       onClick={() => handleRenewMembership(member)}
                       className="px-3 py-1 text-xs bg-green-500 text-white hover:bg-green-600 rounded transition-colors duration-200"
@@ -398,6 +418,15 @@ const Members = () => {
           member={renewMember}
           onClose={handleRenewModalClose}
           onRenewalSuccess={handleRenewalSuccess}
+        />
+      )}
+
+      {/* QR Code Modal */}
+      {showQRModal && (
+        <MemberQRCode
+          member={qrMember}
+          isOpen={showQRModal}
+          onClose={handleQRModalClose}
         />
       )}
     </div>

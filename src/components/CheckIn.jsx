@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNotification } from '../contexts/NotificationContext';
+import QRScanner from './QRScanner';
 
 const CheckIn = () => {
   const [searchType, setSearchType] = useState('phone');
@@ -8,6 +9,7 @@ const CheckIn = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [duplicateMembers, setDuplicateMembers] = useState([]);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   
   let showNotification;
   try {
@@ -75,6 +77,15 @@ const CheckIn = () => {
     setSearchValue('');
     setResult(null);
     setDuplicateMembers([]);
+  };
+
+  const handleQRScanSuccess = (scanResult) => {
+    // QR scan berhasil, otomatis set result ke sukses
+    setResult({
+      success: true,
+      data: scanResult
+    });
+    setShowQRScanner(false);
   };
 
   // Handle selecting a specific member from duplicates
@@ -202,6 +213,14 @@ const CheckIn = () => {
                 className="btn btn-primary btn-md flex-1"
               >
                 {loading ? 'Checking...' : 'Check In'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowQRScanner(true)}
+                className="btn btn-success btn-md"
+                disabled={loading}
+              >
+                📱 QR Scan
               </button>
               <button
                 type="button"
@@ -375,6 +394,13 @@ const CheckIn = () => {
           </div>
         </div>
       )}
+
+      {/* QR Scanner Modal */}
+      <QRScanner
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScanSuccess={handleQRScanSuccess}
+      />
     </div>
   );
 };
