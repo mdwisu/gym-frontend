@@ -126,4 +126,39 @@ export const memberService = {
       throw new Error(error.response?.data?.error || 'Check-in failed');
     }
   },
+
+  async getPaymentMethods() {
+    try {
+      const response = await api.get('/payment-methods');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch payment methods');
+    }
+  },
+
+  async createMemberWithTransaction(memberData, packageId, paymentMethodId, amount) {
+    try {
+      // First create member
+      const memberResponse = await api.post('/members', memberData);
+      const memberId = memberResponse.data.id;
+
+      // Then create transaction
+      const transactionData = {
+        memberId,
+        packageId,
+        paymentMethodId,
+        amount,
+        notes: `Initial membership - ${memberData.membership_type}`
+      };
+
+      const transactionResponse = await api.post('/transactions', transactionData);
+      
+      return {
+        member: memberResponse.data,
+        transaction: transactionResponse.data
+      };
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to create member with transaction');
+    }
+  },
 };

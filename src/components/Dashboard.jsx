@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { memberService } from '../services/memberService';
 import { useNotification } from '../contexts/NotificationContext';
+import DayPassCheckIn from './DayPassCheckIn';
+import QRScanner from './QRScanner';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -11,7 +13,9 @@ const Dashboard = () => {
   });
   const [expiringSoonMembers, setExpiringSoonMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { showError } = useNotification();
+  const [showDayPassModal, setShowDayPassModal] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const { showError, showSuccess } = useNotification();
 
   useEffect(() => {
     loadDashboardData();
@@ -66,6 +70,42 @@ const Dashboard = () => {
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
         <p className="text-gray-600">Overview of your gym members</p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <button
+          onClick={() => setShowDayPassModal(true)}
+          className="flex items-center justify-center p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
+          <span className="text-2xl mr-3">🏃‍♂️</span>
+          <div className="text-left">
+            <div className="font-semibold">Day Pass Check-in</div>
+            <div className="text-sm opacity-90">Single visit access</div>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setShowQRScanner(true)}
+          className="flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
+          <span className="text-2xl mr-3">📱</span>
+          <div className="text-left">
+            <div className="font-semibold">QR Scanner</div>
+            <div className="text-sm opacity-90">Member check-in</div>
+          </div>
+        </button>
+        
+        <a
+          href="/members"
+          className="flex items-center justify-center p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
+          <span className="text-2xl mr-3">👥</span>
+          <div className="text-left">
+            <div className="font-semibold">Manage Members</div>
+            <div className="text-sm opacity-90">Add, edit, renew</div>
+          </div>
+        </a>
       </div>
 
       {/* Stats Grid */}
@@ -132,6 +172,24 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <DayPassCheckIn
+        isOpen={showDayPassModal}
+        onClose={() => setShowDayPassModal(false)}
+        onSuccess={(result) => {
+          showSuccess(`Day Pass created successfully for ${result.member.name}`);
+          loadDashboardData(); // Refresh stats
+        }}
+      />
+
+      <QRScanner
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScanSuccess={(result) => {
+          showSuccess(`Welcome ${result.member.name}!`);
+        }}
+      />
     </div>
   );
 };

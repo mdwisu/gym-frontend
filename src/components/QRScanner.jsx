@@ -244,25 +244,6 @@ const QRScanner = ({ isOpen, onClose, onScanSuccess }) => {
               ⌨️ Enter QR Code Manually
             </button>
 
-            {/* Test QR Button */}
-            <button
-              onClick={() => {
-                const testData = JSON.stringify({
-                  id: 1,
-                  name: "Test User",
-                  membershipType: "Monthly",
-                  endDate: "2024-12-31",
-                  phone: "081234567890",
-                  timestamp: Date.now()
-                });
-                console.log('Testing with data:', testData);
-                handleScanResult({ data: testData });
-              }}
-              className="w-full px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors mb-2"
-            >
-              🧪 Test QR Scanner
-            </button>
-
             <div className="text-xs text-gray-500">
               💡 Make sure the QR code is well-lit and clearly visible
             </div>
@@ -272,35 +253,15 @@ const QRScanner = ({ isOpen, onClose, onScanSuccess }) => {
             <div className="text-4xl mb-4">📷</div>
             <h4 className="font-medium text-gray-900 mb-2">Camera Requires HTTPS</h4>
             <p className="text-gray-500 mb-4">
-              Camera access requires HTTPS connection. Use manual QR input or test button below.
+              Camera access requires HTTPS connection. Use manual QR input below.
             </p>
             
-            <div className="space-y-2">
-              <button
-                onClick={handleManualInput}
-                className="w-full px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-              >
-                ⌨️ Enter QR Code Manually
-              </button>
-              
-              <button
-                onClick={() => {
-                  const testData = JSON.stringify({
-                    id: 1,
-                    name: "Test User",
-                    membershipType: "Monthly",
-                    endDate: "2024-12-31",
-                    phone: "081234567890",
-                    timestamp: Date.now()
-                  });
-                  console.log('Testing with data:', testData);
-                  handleScanResult({ data: testData });
-                }}
-                className="w-full px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-              >
-                🧪 Test Check-in
-              </button>
-            </div>
+            <button
+              onClick={handleManualInput}
+              className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+              ⌨️ Enter QR Code Manually
+            </button>
           </div>
         )}
       </div>

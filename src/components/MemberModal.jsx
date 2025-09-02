@@ -10,15 +10,20 @@ const MemberModal = ({ member, onClose, onSave }) => {
     membership_type: '',
     start_date: new Date().toISOString().split('T')[0],
     duration_months: '',
+    payment_method_id: '',
+    amount: '',
     notes: '',
   });
   const [packages, setPackages] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [loading, setLoading] = useState(false);
   const [packagesLoading, setPackagesLoading] = useState(true);
+  const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true);
   const { showError } = useNotification();
 
   useEffect(() => {
     loadPackages();
+    loadPaymentMethods();
     
     if (member) {
       // Calculate duration months for editing
@@ -34,6 +39,8 @@ const MemberModal = ({ member, onClose, onSave }) => {
         membership_type: member.membershipType,
         start_date: member.startDate.split('T')[0],
         duration_months: months.toString(),
+        payment_method_id: '',
+        amount: '',
         notes: member.notes || '',
       });
     }
@@ -50,6 +57,17 @@ const MemberModal = ({ member, onClose, onSave }) => {
     }
   };
 
+  const loadPaymentMethods = async () => {
+    try {
+      const data = await memberService.getPaymentMethods();
+      setPaymentMethods(data);
+    } catch (error) {
+      showError(error.message);
+    } finally {
+      setPaymentMethodsLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -63,6 +81,7 @@ const MemberModal = ({ member, onClose, onSave }) => {
       ...formData,
       membership_type: e.target.value,
       duration_months: selectedPackage ? selectedPackage.durationMonths.toString() : '',
+      amount: selectedPackage ? selectedPackage.price.toString() : '',
     });
   };
 
@@ -72,9 +91,27 @@ const MemberModal = ({ member, onClose, onSave }) => {
 
     try {
       if (member) {
+        // Edit existing member - no transaction needed
         await memberService.updateMember(member.id, formData);
       } else {
-        await memberService.createMember(formData);
+        // Create new member - need payment method and transaction
+        if (!formData.payment_method_id) {
+          showError('Payment method is required for new member');
+          return;
+        }
+        
+        const selectedPackage = packages.find(pkg => pkg.name === formData.membership_type);
+        if (!selectedPackage) {
+          showError('Package not found');
+          return;
+        }
+
+        await memberService.createMemberWithTransaction(
+          formData,
+          selectedPackage.id,
+          parseInt(formData.payment_method_id),
+          parseFloat(formData.amount)
+        );
       }
       onSave();
     } catch (error) {
@@ -193,6 +230,52 @@ const MemberModal = ({ member, onClose, onSave }) => {
                 />
               </div>
             </div>
+
+            {/* Payment fields - only for new member */}
+            {!member && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="md:col-span-2">
+                  <h4 className="text-sm font-medium text-blue-900 mb-3">💳 Payment Information</h4>
+                </div>
+                <div>
+                  <label htmlFor="payment_method_id" className="form-label">Payment Method *</label>
+                  <select
+                    id="payment_method_id"
+                    name="payment_method_id"
+                    required
+                    value={formData.payment_method_id}
+                    onChange={handleChange}
+                    className="form-input"
+                    disabled={paymentMethodsLoading}
+                  >
+                    <option value="">Select Payment Method</option>
+                    {paymentMethods.map(method => (
+                      <option key={method.id} value={method.id}>
+                        {method.name}
+                      </option>
+                    ))}
+                  </select>
+                  {paymentMethodsLoading && (
+                    <div className="text-sm text-gray-500 mt-1">Loading payment methods...</div>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="amount" className="form-label">Amount (Rp) *</label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    min="0"
+                    step="1000"
+                    required
+                    value={formData.amount}
+                    onChange={handleChange}
+                    className="form-input"
+                    placeholder="Package price (auto-filled)"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="mb-6">
               <label htmlFor="notes" className="form-label">Notes</label>
