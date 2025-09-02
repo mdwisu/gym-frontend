@@ -23,56 +23,74 @@ const MemberQRCode = ({ member, isOpen, onClose }) => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Member QR Code - ${member.name}</title>
+          <title>QR Code - ${member.name}</title>
           <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            
             body { 
               font-family: Arial, sans-serif; 
-              text-align: center; 
-              padding: 20px;
               margin: 0;
-            }
-            .qr-card {
-              border: 2px solid #333;
-              border-radius: 10px;
-              padding: 20px;
-              margin: 20px auto;
-              max-width: 300px;
+              padding: 0;
               background: white;
             }
-            .member-info { 
-              margin: 15px 0; 
-              line-height: 1.4;
+            
+            /* Portrait QR Print Size */
+            @page {
+              size: 80mm 120mm;
+              margin: 5mm;
             }
-            .member-name { 
-              font-size: 18px; 
-              font-weight: bold; 
-              margin-bottom: 5px;
+            
+            .qr-container {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              text-align: center;
+              padding: 10mm;
             }
-            .member-id { 
-              color: #666; 
-              font-size: 14px;
+            
+            .qr-code {
+              margin: 10mm 0;
+              width: 60mm;
+              height: 60mm;
             }
-            .qr-code { 
-              margin: 15px 0;
+            
+            .member-info {
+              margin-bottom: 5mm;
             }
-            @media print {
-              body { margin: 0; }
-              .qr-card { margin: 0; border: 1px solid #000; }
+            
+            .member-name {
+              font-size: 16px;
+              font-weight: bold;
+              margin-bottom: 2mm;
+            }
+            
+            .member-id {
+              font-size: 12px;
+              color: #666;
+            }
+            
+            .instruction {
+              font-size: 10px;
+              color: #888;
+              margin-top: 5mm;
             }
           </style>
         </head>
         <body>
-          <div class="qr-card">
+          <div class="qr-container">
             <div class="member-info">
               <div class="member-name">${member.name}</div>
-              <div class="member-id">ID: #${member.id} | ${member.membershipType}</div>
-              <div class="member-id">Valid until: ${new Date(member.endDate).toLocaleDateString('id-ID')}</div>
+              <div class="member-id">Member ID: #${member.id}</div>
             </div>
+            
             <div class="qr-code">
               ${qrElement.innerHTML}
             </div>
-            <div style="font-size: 12px; color: #888; margin-top: 10px;">
-              Scan this QR code for gym check-in
+            
+            <div class="instruction">
+              Scan for gym check-in
             </div>
           </div>
         </body>
@@ -101,18 +119,13 @@ const MemberQRCode = ({ member, isOpen, onClose }) => {
         </div>
 
         <div className="text-center">
-          {/* Member Info */}
+          {/* Member Info - Minimal */}
           <div className="mb-4">
             <div className="font-medium text-lg text-gray-900">{member.name}</div>
-            <div className="text-sm text-gray-500">
-              ID: #{member.id} | {member.membershipType}
-            </div>
-            <div className="text-sm text-gray-500">
-              Valid until: {new Date(member.endDate).toLocaleDateString('id-ID')}
-            </div>
+            <div className="text-sm text-gray-500">Member ID: #{member.id}</div>
           </div>
 
-          {/* QR Code */}
+          {/* QR Code Only */}
           <div className="bg-white p-4 rounded-lg border-2 border-gray-200 mb-4" id="qr-code-print">
             <QRCode
               size={200}
@@ -123,7 +136,7 @@ const MemberQRCode = ({ member, isOpen, onClose }) => {
           </div>
 
           <div className="text-xs text-gray-500 mb-4">
-            Scan this QR code for gym check-in
+            Scan for gym check-in
           </div>
 
           {/* Action Buttons */}

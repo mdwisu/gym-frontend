@@ -429,7 +429,7 @@ const MemberCard = () => {
               <div className="qr-section">
                 <div className="qr-container">
                   <QRCode
-                    size={60}
+                    size={50}
                     style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                     value={JSON.stringify({
                       id: member.id,
@@ -439,10 +439,10 @@ const MemberCard = () => {
                       phone: member.phone || '',
                       timestamp: Date.now()
                     })}
-                    viewBox={`0 0 60 60`}
+                    viewBox={`0 0 50 50`}
                   />
                 </div>
-                <div className="qr-label">Scan for Check-in</div>
+                <div className="qr-label">SCAN FOR<br/>CHECK-IN</div>
               </div>
 
               {/* Footer */}
