@@ -119,15 +119,29 @@ const QRScanner = ({ isOpen, onClose, onScanSuccess }) => {
       // Call check-in API - use member ID as primary identifier
       const response = await memberService.checkinMember(memberData.id, memberData.name, memberData.phone);
       
-      // Success feedback
-      showSuccess(`✅ Check-in successful! Welcome ${memberData.name}`);
+      // Use response data from backend (contains calculated fields like status, daysRemaining)
+      const backendMemberData = response.member;
       
-      // Notify parent component
+      // Create success message based on available data
+      let successMessage = `Welcome ${backendMemberData.name}!`;
+      
+      // Add status information if available
+      if (backendMemberData.status === 'expiring_soon') {
+        successMessage += ` ⚠️ ${backendMemberData.daysRemaining} days remaining`;
+      } else if (backendMemberData.status === 'active') {
+        successMessage += ` 💚 Active membership`;
+      }
+      
+      showSuccess(successMessage);
+      
+      // Notify parent component with backend response data
       if (onScanSuccess) {
         onScanSuccess({
-          member: memberData,
+          member: backendMemberData, // Use backend data with calculated fields
           checkInTime: new Date(),
-          success: true
+          success: true,
+          canEnter: response.canEnter,
+          warning: response.warning
         });
       }
 
