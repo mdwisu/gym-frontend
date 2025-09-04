@@ -4,6 +4,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import MemberModal from './MemberModal';
 import RenewMembershipModal from './RenewMembershipModal';
 import MemberQRCode from './MemberQRCode';
+import MemberHistory from './MemberHistory';
 
 const Members = () => {
   const [members, setMembers] = useState([]);
@@ -19,6 +20,8 @@ const Members = () => {
   const [renewMember, setRenewMember] = useState(null);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrMember, setQrMember] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyMember, setHistoryMember] = useState(null);
   
   const { showSuccess, showError } = useNotification();
 
@@ -116,6 +119,16 @@ const Members = () => {
   const handleQRModalClose = () => {
     setShowQRModal(false);
     setQrMember(null);
+  };
+
+  const handleShowHistory = (member) => {
+    setHistoryMember(member);
+    setShowHistoryModal(true);
+  };
+
+  const handleHistoryModalClose = () => {
+    setShowHistoryModal(false);
+    setHistoryMember(null);
   };
 
   const formatDate = (dateString) => {
@@ -240,6 +253,13 @@ const Members = () => {
                 </div>
                 <div className="flex items-center">
                   <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleShowHistory(member)}
+                      className="px-3 py-1 text-xs bg-purple-500 text-white hover:bg-purple-600 rounded transition-colors duration-200"
+                      title="View History"
+                    >
+                      📊 History
+                    </button>
                     <button
                       onClick={() => handleShowQR(member)}
                       className="px-3 py-1 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded transition-colors duration-200"
@@ -427,6 +447,14 @@ const Members = () => {
           member={qrMember}
           isOpen={showQRModal}
           onClose={handleQRModalClose}
+        />
+      )}
+
+      {/* Member History Modal */}
+      {showHistoryModal && (
+        <MemberHistory
+          member={historyMember}
+          onClose={handleHistoryModalClose}
         />
       )}
     </div>

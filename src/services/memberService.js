@@ -138,27 +138,27 @@ export const memberService = {
 
   async createMemberWithTransaction(memberData, packageId, paymentMethodId, amount) {
     try {
-      // First create member
-      const memberResponse = await api.post('/members', memberData);
-      const memberId = memberResponse.data.id;
-
-      // Then create transaction
-      const transactionData = {
-        memberId,
+      // Use integrated endpoint that creates member + transaction + membership period
+      const requestData = {
+        ...memberData,
         packageId,
         paymentMethodId,
-        amount,
-        notes: `Initial membership - ${memberData.membership_type}`
+        amount
       };
 
-      const transactionResponse = await api.post('/transactions', transactionData);
-      
-      return {
-        member: memberResponse.data,
-        transaction: transactionResponse.data
-      };
+      const response = await api.post('/members/with-transaction', requestData);
+      return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to create member with transaction');
+    }
+  },
+
+  async getMemberHistory(memberId) {
+    try {
+      const response = await api.get(`/members/${memberId}/history`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch member history');
     }
   },
 };

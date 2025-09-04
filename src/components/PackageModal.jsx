@@ -10,6 +10,12 @@ const PackageModal = ({ isOpen, onClose, package: editingPackage, onSave }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Check if editing Day Pass package
+  const isDayPass = editingPackage && (
+    editingPackage.name === 'Day Pass' || 
+    editingPackage.durationMonths === 0
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -45,32 +51,56 @@ const PackageModal = ({ isOpen, onClose, package: editingPackage, onSave }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.name.trim() || !formData.durationMonths || !formData.price) {
-      setError('Please fill in all required fields');
-      return;
-    }
+    // Validation for Day Pass
+    if (isDayPass) {
+      if (!formData.price) {
+        setError('Please fill in the price field');
+        return;
+      }
 
-    if (parseFloat(formData.price) <= 0) {
-      setError('Price must be greater than 0');
-      return;
-    }
+      if (parseFloat(formData.price) <= 0) {
+        setError('Price must be greater than 0');
+        return;
+      }
+    } else {
+      // Validation for regular packages
+      if (!formData.name.trim() || !formData.durationMonths || !formData.price) {
+        setError('Please fill in all required fields');
+        return;
+      }
 
-    if (parseInt(formData.durationMonths) <= 0) {
-      setError('Duration must be greater than 0 months');
-      return;
+      if (parseFloat(formData.price) <= 0) {
+        setError('Price must be greater than 0');
+        return;
+      }
+
+      if (parseInt(formData.durationMonths) <= 0) {
+        setError('Duration must be greater than 0 months');
+        return;
+      }
     }
 
     setLoading(true);
     setError('');
 
     try {
-      const packageData = {
-        name: formData.name.trim(),
-        durationMonths: parseInt(formData.durationMonths),
-        price: parseFloat(formData.price),
-        description: formData.description.trim() || null
-      };
+      let packageData;
+      
+      if (isDayPass) {
+        // For Day Pass, only send price and description
+        packageData = {
+          price: parseFloat(formData.price),
+          description: formData.description.trim() || null
+        };
+      } else {
+        // For regular packages, send all fields
+        packageData = {
+          name: formData.name.trim(),
+          durationMonths: parseInt(formData.durationMonths),
+          price: parseFloat(formData.price),
+          description: formData.description.trim() || null
+        };
+      }
 
       if (editingPackage) {
         await memberService.updatePackage(editingPackage.id, packageData);
@@ -96,7 +126,7 @@ const PackageModal = ({ isOpen, onClose, package: editingPackage, onSave }) => {
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-800">
-              {editingPackage ? 'Edit Package' : 'Add New Package'}
+              {editingPackage ? (isDayPass ? 'Edit Day Pass' : 'Edit Package') : 'Add New Package'}
             </h2>
             <button
               onClick={onClose}
@@ -109,6 +139,12 @@ const PackageModal = ({ isOpen, onClose, package: editingPackage, onSave }) => {
             </button>
           </div>
 
+          {isDayPass && (
+            <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-800 rounded">
+              <strong>Day Pass Protection:</strong> Only price and description can be modified for Day Pass packages.
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
@@ -118,36 +154,46 @@ const PackageModal = ({ isOpen, onClose, package: editingPackage, onSave }) => {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Package Name *
+                Package Name {isDayPass ? '(Protected)' : '*'}
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${isDayPass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 placeholder="e.g., Monthly, 3 Months, Annual"
-                required
-                disabled={loading}
+                required={!isDayPass}
+                disabled={loading || isDayPass}
               />
+              {isDayPass && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Day Pass name cannot be changed
+                </p>
+              )}
             </div>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (Months) *
+                Duration (Months) {isDayPass ? '(Protected)' : '*'}
               </label>
               <input
                 type="number"
                 name="durationMonths"
                 value={formData.durationMonths}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${isDayPass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 placeholder="e.g., 1, 3, 6, 12"
-                min="1"
+                min="0"
                 step="1"
-                required
-                disabled={loading}
+                required={!isDayPass}
+                disabled={loading || isDayPass}
               />
+              {isDayPass && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Day Pass duration cannot be changed
+                </p>
+              )}
             </div>
 
             <div className="mb-4">

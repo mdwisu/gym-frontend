@@ -193,7 +193,7 @@ const MemberModal = ({ member, onClose, onSave }) => {
                   <option value="">Select Package</option>
                   {packages.map(pkg => (
                     <option key={pkg.id} value={pkg.name}>
-                      {pkg.name} ({pkg.durationMonths} months)
+                      {pkg.name} ({pkg.durationMonths === 0 ? 'Single Day' : `${pkg.durationMonths} months`}) - Rp {pkg.price.toLocaleString()}
                     </option>
                   ))}
                 </select>
@@ -222,12 +222,18 @@ const MemberModal = ({ member, onClose, onSave }) => {
                   type="number"
                   id="duration_months"
                   name="duration_months"
-                  min="1"
+                  min="0"
                   required
                   value={formData.duration_months}
                   onChange={handleChange}
                   className="form-input"
+                  title={formData.duration_months === '0' ? 'Day Pass - Single day access' : 'Monthly duration'}
                 />
+                {formData.duration_months === '0' && (
+                  <div className="text-xs text-amber-600 mt-1">
+                    📅 Day Pass - Valid for single day only
+                  </div>
+                )}
               </div>
             </div>
 
