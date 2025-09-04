@@ -25,6 +25,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [token]);
 
+  useEffect(() => {
+    // Listen for storage changes (when token is removed by API interceptor)
+    const handleStorageChange = (e) => {
+      if (e.key === 'authToken' && e.newValue === null) {
+        // Token was removed, update state
+        setToken(null);
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const login = async (username, password) => {
     try {
       const response = await authService.login(username, password);

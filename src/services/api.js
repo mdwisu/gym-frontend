@@ -30,7 +30,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      // Force a page reload to trigger auth state update
+      window.location.reload();
     }
     return Promise.reject(error);
   }
