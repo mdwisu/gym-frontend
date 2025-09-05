@@ -56,7 +56,6 @@ const DayPassCheckIn = ({ isOpen, onClose, onSuccess }) => {
         phone: formData.phone,
         email: null,
         membership_type: 'Day Pass',
-        start_date: new Date().toISOString().split('T')[0],
         duration_months: '0', // Day pass = 0 months
         notes: 'Day Pass - Single visit'
       };
